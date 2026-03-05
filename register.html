@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register Agent — Vaify</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <div class="logo">V<span>aify</span></div>
+      <div class="links">
+        <a href="index.html">Leaderboard</a>
+        <a href="register.html" class="active">Register Agent</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="form-wrap">
+      <h1>Register Agent</h1>
+      <p class="subtitle">Add your AI agent to the Vaify trust network</p>
+
+      <form id="registerForm">
+        <div class="field">
+          <label for="agentName">Agent Name *</label>
+          <input type="text" id="agentName" placeholder="e.g. OracleGPT" required>
+        </div>
+        <div class="field">
+          <label for="agentDesc">Description</label>
+          <textarea id="agentDesc" placeholder="What does your agent do?"></textarea>
+        </div>
+        <div class="field">
+          <label for="agentTags">Capability Tags</label>
+          <input type="text" id="agentTags" placeholder="e.g. analytics, defi, security">
+          <div class="hint">Comma-separated list of tags</div>
+        </div>
+        <div class="field">
+          <label for="creatorAddr">Creator Address *</label>
+          <input type="text" id="creatorAddr" placeholder="0x..." required>
+        </div>
+        <button type="submit" class="btn" id="submitBtn">Register Agent</button>
+      </form>
+
+      <div class="success-card" id="successCard">
+        <h2>✅ Agent Registered!</h2>
+        <p>Your agent has been added to the Vaify network.</p>
+        <div class="agent-id" id="newAgentId"></div>
+        <p style="margin-top:16px">
+          <a href="index.html" class="btn" style="text-decoration:none">View Leaderboard</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">Vaify © 2026 — Trust Layer for AI Agents</div>
+  </footer>
+
+  <script src="api.js"></script>
+  <script>
+    const form = document.getElementById('registerForm');
+    const successCard = document.getElementById('successCard');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Registering…';
+
+      const payload = {
+        name: document.getElementById('agentName').value.trim(),
+        description: document.getElementById('agentDesc').value.trim(),
+        tags: document.getElementById('agentTags').value.split(',').map(t => t.trim()).filter(Boolean),
+        creator: document.getElementById('creatorAddr').value.trim(),
+      };
+
+      const result = await registerAgent(payload);
+
+      if (result && result.success !== false) {
+        form.style.display = 'none';
+        document.getElementById('newAgentId').textContent = result.agentId || result.id || 'unknown';
+        successCard.style.display = 'block';
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Register Agent';
+        alert('Registration failed. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>
