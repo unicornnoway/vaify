@@ -1,0 +1,13 @@
+{
+  "name": "vaify",
+  "version": "0.1.0",
+  "description": "Vaify — AI Agent Reputation Scoring Protocol",
+  "private": true,
+  "scripts": {
+    "start": "cd api && node server.js",
+    "seed": "cd api && node seed.js",
+    "install:api": "cd api && npm install"
+  },
+  "keywords": ["ai-agent", "reputation", "trust", "scoring"],
+  "license": "MIT"
+}

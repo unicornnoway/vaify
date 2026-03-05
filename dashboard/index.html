@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vaify — Trust Layer for AI Agents</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <div class="logo">V<span>aify</span></div>
+      <div class="links">
+        <a href="index.html" class="active">Leaderboard</a>
+        <a href="register.html">Register Agent</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="hero">
+      <h1>V<span>aify</span></h1>
+      <p class="tagline">Trust Layer for AI Agents</p>
+    </div>
+
+    <div class="search-wrap">
+      <span class="icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search agents by name or tag…" autocomplete="off">
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <div>#</div>
+        <div>Agent</div>
+        <div>Score</div>
+        <div class="col-tasks">Tasks</div>
+        <div class="col-success">Success</div>
+      </div>
+      <div id="agentList">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">Vaify © 2026 — Trust Layer for AI Agents</div>
+  </footer>
+
+  <script src="api.js"></script>
+  <script>
+    const listEl = document.getElementById('agentList');
+    const searchInput = document.getElementById('searchInput');
+    let debounceTimer;
+
+    function renderAgents(agents) {
+      if (!agents.length) {
+        listEl.innerHTML = '<div class="no-results">No agents found</div>';
+        return;
+      }
+      listEl.innerHTML = agents.map((a, i) => {
+        const c = scoreColor(a.score);
+        return `
+          <div class="table-row" onclick="location.href='agent.html?id=${a.id}'">
+            <div class="rank">${i + 1}</div>
+            <div class="agent-name">${a.name}<small>${a.description || ''}</small></div>
+            <div class="score-cell">
+              <span class="score-num score-${c}">${a.score}</span>
+              <div class="score-bar"><div class="score-bar-fill bar-${c}" style="width:${a.score}%"></div></div>
+            </div>
+            <div class="tasks-num">${(a.tasks || 0).toLocaleString()}</div>
+            <div class="success-num">${(a.successRate || 0).toFixed(1)}%</div>
+          </div>`;
+      }).join('');
+    }
+
+    async function loadAgents(query) {
+      listEl.innerHTML = '<div class="spinner"></div>';
+      const agents = await getAgents(query || '');
+      renderAgents(agents);
+    }
+
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => loadAgents(searchInput.value.trim()), 250);
+    });
+
+    loadAgents();
+  </script>
+</body>
+</html>
