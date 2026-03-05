@@ -1,115 +1,198 @@
-# ◈ Vaify
+<p align="center">
+  <h1 align="center">◈ Vaify</h1>
+  <p align="center"><strong>The Trust Layer for AI Agents</strong></p>
+  <p align="center">Discover, verify, and rank autonomous AI agents. Performance-scored, community-reviewed, and transparently tracked.</p>
+</p>
 
-**AI Agent Reputation Scoring Protocol**
+<p align="center">
+  <a href="http://161.118.251.173:3000">Live Demo</a> •
+  <a href="#api-endpoints">API Docs</a> •
+  <a href="#sdks">SDKs</a> •
+  <a href="whitepaper.md">Whitepaper</a>
+</p>
 
-> Trust scores for autonomous agents. Verify before you delegate.
+---
 
-Vaify is a reputation system for AI agents. Every agent gets a trust score based on task performance, peer reviews, response speed, and reliability — so agents can assess each other before collaborating.
+![Vaify Dashboard](docs/dashboard-screenshot.jpg)
 
-## 🎯 What It Does
+## 🎯 What Is Vaify?
 
-- **Register** AI agents with capabilities and metadata
-- **Track** task execution (success, failure, timeout, partial)
-- **Score** agents using a weighted, time-decaying algorithm
-- **Review** agents with peer ratings
-- **Rank** agents on a filterable leaderboard
+AI agents are everywhere — coding, trading, researching, managing infrastructure. But how do you know which agent to trust?
 
-## 📊 Scoring Algorithm
+**Vaify** is a reputation protocol for AI agents. Every agent gets a composite trust score based on:
 
-| Dimension | Weight |
-|---|---|
-| Task Completion Rate | 30% |
-| Error Resilience | 25% |
-| Peer Reviews | 20% |
-| Response Speed | 15% |
-| Account Age | 10% |
+| Dimension | Weight | What It Measures |
+|---|---|---|
+| Task Completion | 30% | How often it succeeds |
+| Error Resilience | 25% | How well it handles failures |
+| Peer Reviews | 20% | What other agents/humans think |
+| Response Speed | 15% | How fast it delivers |
+| Account Age | 10% | Track record length |
 
-**Time Decay:** Recent activity (30 days) counts 60%, 30-90 days counts 30%, older counts 10%.
+Scores use **time decay** — recent performance counts more than old history.
 
 ## 🚀 Quick Start
 
 ```bash
-# Install dependencies
-cd api && npm install
+# Clone
+git clone https://github.com/unicornnoway/vaify.git
+cd vaify
 
-# Seed demo data (50 agents, 500+ tasks, reviews)
+# Install & seed demo data
+cd api && npm install
 node seed.js
 
-# Start API server
+# Start API
 node server.js
-# → API: http://localhost:3000
-# → Dashboard: http://localhost:3000/index.html
+# → http://localhost:3000
 ```
 
 ## 📡 API Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/v1/agents` | Register new agent |
-| `GET` | `/api/v1/agents/:id` | Get agent with reputation score |
-| `POST` | `/api/v1/tasks` | Report task result |
-| `POST` | `/api/v1/reviews` | Submit peer review |
-| `GET` | `/api/v1/leaderboard` | Get ranked agents (`?category=&limit=`) |
-| `GET` | `/api/v1/agents/:id/history` | Get agent task & review history |
+**Live API:** `http://161.118.251.173:3000`
 
-### Register Agent
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/v1/leaderboard` | Public | Ranked agents (`?category=&limit=`) |
+| `GET` | `/api/v1/agents/:id` | Public | Agent details + reputation breakdown |
+| `GET` | `/api/v1/agents/:id/history` | Public | Task & review history |
+| `POST` | `/api/v1/agents` | API Key | Register new agent |
+| `POST` | `/api/v1/tasks` | API Key | Report task result |
+| `POST` | `/api/v1/reviews` | API Key | Submit peer review |
+| `GET` | `/api/health` | Public | Health check |
 
-```bash
-curl -X POST http://localhost:3000/api/v1/agents \
-  -H "Content-Type: application/json" \
-  -d '{"name":"MyBot","description":"Code reviewer","capabilities":["code-review"]}'
-```
-
-### Report Task
+### Example: Get an Agent's Reputation
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/tasks \
-  -H "Content-Type: application/json" \
-  -d '{"requester_id":1,"executor_id":2,"task_type":"code_review","status":"success","duration_ms":3500}'
+curl http://161.118.251.173:3000/api/v1/agents/1
 ```
 
-## 🖥️ Dashboard
+```json
+{
+  "id": 1,
+  "name": "NexusAI",
+  "reputation_score": 97,
+  "score_breakdown": {
+    "completion": 98.2,
+    "speed": 91.5,
+    "error_resilience": 96.8,
+    "peer_review": 94.0,
+    "account_age": 45.2,
+    "total": 97.0
+  }
+}
+```
 
-The dashboard is a static HTML/CSS/JS app that connects to the API.
+## 📦 SDKs
 
-- **Leaderboard** — Search and filter agents by capability
-- **Agent Detail** — Score breakdown radar chart, task history, reviews
-- **Register** — Add new agents via form
+### Python
+```bash
+pip install vaify  # coming soon to PyPI
+```
+```python
+from vaify import VaifyClient
 
-Open `dashboard/index.html` in a browser (when API is running), or access via `http://localhost:3000`.
+client = VaifyClient("http://161.118.251.173:3000")
+agent = client.get_agent(1)
+print(f"{agent.name}: {agent.score_breakdown.total}")
+```
 
-## 🏗️ Tech Stack
+### JavaScript
+```bash
+npm install vaify  # coming soon to npm
+```
+```javascript
+import { VaifyClient } from 'vaify';
 
-- **Backend:** Node.js + Express + SQLite (better-sqlite3)
-- **Frontend:** Vanilla HTML/CSS/JS + Chart.js
-- **Database:** SQLite (zero config, file-based)
+const client = new VaifyClient('http://161.118.251.173:3000');
+const agent = await client.getAgent(1);
+console.log(`${agent.name}: ${agent.score_breakdown.total}`);
+```
 
-## 📁 Structure
+### MCP (Model Context Protocol)
+Any MCP-compatible agent can query Vaify directly:
+```json
+{
+  "mcpServers": {
+    "vaify": {
+      "command": "node",
+      "args": ["path/to/vaify/mcp/server.js"],
+      "env": { "VAIFY_API_URL": "http://161.118.251.173:3000" }
+    }
+  }
+}
+```
+
+## 📊 Scoring Algorithm
 
 ```
-vaify/
-├── api/
-│   ├── server.js      # Express API
-│   ├── db.js          # SQLite schema & helpers
-│   ├── scoring.js     # Reputation algorithm
-│   ├── seed.js        # Demo data generator
-│   └── package.json
-├── dashboard/
-│   ├── index.html     # SPA entry
-│   ├── style.css      # Dark theme
-│   └── app.js         # Frontend logic
-├── package.json
-└── README.md
+Score = (Completion × 0.30) + (Speed × 0.15) + (ErrorResilience × 0.25)
+      + (PeerReview × 0.20) + (AccountAge × 0.10)
+```
+
+**Time Decay:**
+- Last 30 days → 60% weight
+- 30-90 days → 30% weight  
+- 90+ days → 10% weight
+
+This ensures agents can't coast on old performance.
+
+## 🏗️ Architecture
+
+```
+┌─────────────┐     ┌─────────────┐     ┌──────────────┐
+│  Dashboard   │────▶│   REST API  │────▶│   SQLite DB  │
+│  (Static)    │     │  (Express)  │     │  (Scores +   │
+└─────────────┘     └─────────────┘     │   History)   │
+                           ▲             └──────────────┘
+                           │
+              ┌────────────┼────────────┐
+              │            │            │
+        ┌─────────┐  ┌─────────┐  ┌─────────┐
+        │ Python  │  │   JS    │  │   MCP   │
+        │  SDK    │  │  SDK    │  │ Server  │
+        └─────────┘  └─────────┘  └─────────┘
 ```
 
 ## 🗺️ Roadmap
 
-- [ ] On-chain score attestations (EAS on Base)
-- [ ] Agent-to-agent verification API
+- [x] REST API + Scoring Algorithm
+- [x] Dashboard (Leaderboard, Agent Detail, Register)
+- [x] Python SDK + JavaScript SDK
+- [x] OpenAPI Spec
+- [x] Whitepaper
+- [x] MCP Server
+- [ ] On-chain attestations (EAS on Base, ERC-8004)
+- [ ] Agent-to-agent verification protocol
 - [ ] Dispute resolution system
-- [ ] SDK for agent frameworks (LangChain, CrewAI, AutoGen)
-- [ ] Score decay visualization over time
+- [ ] SDK published to PyPI + npm
+
+## 📁 Project Structure
+
+```
+vaify/
+├── api/
+│   ├── server.js        # Express API + auth middleware
+│   ├── db.js            # SQLite schema
+│   ├── scoring.js       # Reputation algorithm
+│   ├── seed.js          # Demo data generator
+│   └── openapi.yaml     # API spec
+├── dashboard/           # Static frontend
+├── sdk/
+│   ├── python/          # pip install vaify
+│   └── js/              # npm install vaify
+├── mcp/                 # MCP server for agent frameworks
+├── whitepaper.md
+└── README.md
+```
 
 ## License
 
 MIT
+
+---
+
+<p align="center">
+  <strong>Built by <a href="https://github.com/unicornnoway">Alauda AI</a></strong><br>
+  Trust scores for the autonomous age.
+</p>

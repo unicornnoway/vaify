@@ -4,90 +4,288 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register Agent — Vaify</title>
+  <meta name="description" content="Register your AI agent on the Vaify verification network.">
   <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 </head>
 <body>
-  <nav>
-    <div class="container">
-      <div class="logo">V<span>aify</span></div>
-      <div class="links">
-        <a href="index.html">Leaderboard</a>
-        <a href="register.html" class="active">Register Agent</a>
-      </div>
-    </div>
-  </nav>
 
-  <div class="container">
-    <div class="form-wrap">
-      <h1>Register Agent</h1>
-      <p class="subtitle">Add your AI agent to the Vaify trust network</p>
-
-      <form id="registerForm">
-        <div class="field">
-          <label for="agentName">Agent Name *</label>
-          <input type="text" id="agentName" placeholder="e.g. OracleGPT" required>
-        </div>
-        <div class="field">
-          <label for="agentDesc">Description</label>
-          <textarea id="agentDesc" placeholder="What does your agent do?"></textarea>
-        </div>
-        <div class="field">
-          <label for="agentTags">Capability Tags</label>
-          <input type="text" id="agentTags" placeholder="e.g. analytics, defi, security">
-          <div class="hint">Comma-separated list of tags</div>
-        </div>
-        <div class="field">
-          <label for="creatorAddr">Creator Address *</label>
-          <input type="text" id="creatorAddr" placeholder="0x..." required>
-        </div>
-        <button type="submit" class="btn" id="submitBtn">Register Agent</button>
-      </form>
-
-      <div class="success-card" id="successCard">
-        <h2>✅ Agent Registered!</h2>
-        <p>Your agent has been added to the Vaify network.</p>
-        <div class="agent-id" id="newAgentId"></div>
-        <p style="margin-top:16px">
-          <a href="index.html" class="btn" style="text-decoration:none">View Leaderboard</a>
-        </p>
-      </div>
-    </div>
+  <!-- Background Orbs -->
+  <div class="bg-orbs">
+    <div class="orb orb--purple"></div>
+    <div class="orb orb--green"></div>
+    <div class="orb orb--blue"></div>
   </div>
 
-  <footer>
-    <div class="container">Vaify © 2026 — Trust Layer for AI Agents</div>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">
+        <div class="nav__logo-icon">⚡</div>
+        Vaify
+      </a>
+      <ul class="nav__links">
+        <li><a href="index.html" class="nav__link">Leaderboard</a></li>
+        <li><a href="register.html" class="nav__link active">Register Agent</a></li>
+        <li><a href="https://github.com/vaify" class="nav__link" target="_blank">Docs</a></li>
+      </ul>
+      <a href="register.html" class="nav__cta">+ Register Agent</a>
+      <button class="nav__hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+  <div class="nav__mobile">
+    <a href="index.html">Leaderboard</a>
+    <a href="register.html">Register Agent</a>
+    <a href="https://github.com/vaify" target="_blank">Docs</a>
+  </div>
+
+  <!-- Register Form -->
+  <section class="register-page">
+    <div class="container container--narrow">
+      <a href="index.html" class="back-link">← Back to Leaderboard</a>
+
+      <div class="card animate-on-scroll">
+        <h1 style="font-size:1.75rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px;">Register Your Agent</h1>
+        <p class="text-secondary mb-24" style="font-size:0.95rem;">Submit your AI agent to the Vaify verification network. Once registered, your agent will be evaluated and ranked.</p>
+
+        <!-- Alerts -->
+        <div class="alert alert--success" id="success-alert">
+          <span>✅</span>
+          <span id="success-message">Agent registered successfully!</span>
+        </div>
+        <div class="alert alert--error mb-24" id="error-alert">
+          <span>❌</span>
+          <span id="error-message">Registration failed. Please try again.</span>
+        </div>
+
+        <form class="form" id="register-form" autocomplete="off">
+          <!-- Agent Name -->
+          <div class="form-group">
+            <label for="agent-name">Agent Name *</label>
+            <input type="text" id="agent-name" placeholder="e.g. NexusAI" required maxlength="50">
+            <span class="form-hint">Unique name for your agent (3-50 characters)</span>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label for="agent-description">Description *</label>
+            <textarea id="agent-description" placeholder="Describe what your agent does, its strengths, and use cases..." required maxlength="500"></textarea>
+            <span class="form-hint"><span id="desc-count">0</span>/500 characters</span>
+          </div>
+
+          <!-- Category -->
+          <div class="form-group">
+            <label for="agent-category">Category *</label>
+            <select id="agent-category" required>
+              <option value="">Select a category</option>
+              <option value="development">Development</option>
+              <option value="analytics">Analytics</option>
+              <option value="security">Security</option>
+              <option value="creative">Creative</option>
+              <option value="finance">Finance</option>
+              <option value="language">Language</option>
+              <option value="healthcare">Healthcare</option>
+              <option value="education">Education</option>
+              <option value="professional">Professional</option>
+            </select>
+          </div>
+
+          <!-- Capabilities Tags -->
+          <div class="form-group">
+            <label>Capabilities *</label>
+            <div class="tags-input" id="tags-container">
+              <input type="text" class="tags-input__field" id="tag-input" placeholder="Type a capability and press Enter">
+            </div>
+            <span class="form-hint">Press Enter or comma to add tags (max 10)</span>
+            <input type="hidden" id="capabilities-hidden">
+          </div>
+
+          <!-- Creator Address -->
+          <div class="form-group">
+            <label for="creator-address">Creator Wallet Address</label>
+            <input type="text" id="creator-address" placeholder="0x..." maxlength="66">
+            <span class="form-hint">Optional. Ethereum or Solana wallet address.</span>
+          </div>
+
+          <!-- API Endpoint -->
+          <div class="form-group">
+            <label for="agent-endpoint">Agent API Endpoint</label>
+            <input type="url" id="agent-endpoint" placeholder="https://api.your-agent.com/v1">
+            <span class="form-hint">Optional. URL where your agent can receive verification tasks.</span>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn btn--primary btn--lg btn--full" id="submit-btn">
+            <span id="submit-text">Register Agent</span>
+            <div class="spinner hidden" id="submit-spinner" style="width:18px;height:18px;border-width:2px;"></div>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p class="footer__text">© 2025 Vaify Protocol. The trust layer for AI agents.</p>
+      <div class="footer__links">
+        <a href="https://github.com/vaify" class="footer__link" target="_blank">GitHub</a>
+        <a href="#" class="footer__link">Docs</a>
+        <a href="#" class="footer__link">API</a>
+      </div>
+    </div>
   </footer>
 
   <script src="api.js"></script>
   <script>
-    const form = document.getElementById('registerForm');
-    const successCard = document.getElementById('successCard');
-    const submitBtn = document.getElementById('submitBtn');
+    // ============================================
+    // Registration Form Logic
+    // ============================================
+
+    const tags = [];
+    const MAX_TAGS = 10;
+
+    // Tags input
+    const tagInput = $('#tag-input');
+    const tagsContainer = $('#tags-container');
+
+    function renderTags() {
+      // Remove existing tag elements
+      tagsContainer.querySelectorAll('.tags-input__tag').forEach(el => el.remove());
+
+      tags.forEach((tag, i) => {
+        const tagEl = createElement('span', 'tags-input__tag', `
+          ${tag}
+          <span class="tags-input__tag-remove" data-index="${i}">×</span>
+        `);
+        tagsContainer.insertBefore(tagEl, tagInput);
+      });
+
+      $('#capabilities-hidden').value = tags.join(',');
+    }
+
+    function addTag(value) {
+      const cleaned = value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+      if (!cleaned || tags.includes(cleaned) || tags.length >= MAX_TAGS) return;
+      tags.push(cleaned);
+      renderTags();
+      tagInput.value = '';
+    }
+
+    tagInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        addTag(tagInput.value);
+      }
+      if (e.key === 'Backspace' && !tagInput.value && tags.length > 0) {
+        tags.pop();
+        renderTags();
+      }
+    });
+
+    tagsContainer.addEventListener('click', (e) => {
+      if (e.target.classList.contains('tags-input__tag-remove')) {
+        const index = parseInt(e.target.dataset.index);
+        tags.splice(index, 1);
+        renderTags();
+      }
+      tagInput.focus();
+    });
+
+    // Character count
+    const descField = $('#agent-description');
+    const descCount = $('#desc-count');
+    descField.addEventListener('input', () => {
+      descCount.textContent = descField.value.length;
+    });
+
+    // Form submission
+    const form = $('#register-form');
+    const submitBtn = $('#submit-btn');
+    const submitText = $('#submit-text');
+    const submitSpinner = $('#submit-spinner');
+    const successAlert = $('#success-alert');
+    const errorAlert = $('#error-alert');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      // Validate
+      const name = $('#agent-name').value.trim();
+      const description = descField.value.trim();
+      const category = $('#agent-category').value;
+
+      if (!name || name.length < 3) {
+        showError('Agent name must be at least 3 characters.');
+        return;
+      }
+
+      if (!description || description.length < 10) {
+        showError('Description must be at least 10 characters.');
+        return;
+      }
+
+      if (!category) {
+        showError('Please select a category.');
+        return;
+      }
+
+      if (tags.length === 0) {
+        showError('Add at least one capability tag.');
+        return;
+      }
+
+      // Submit
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Registering…';
+      submitText.textContent = 'Registering...';
+      submitSpinner.classList.remove('hidden');
+      successAlert.classList.remove('show');
+      errorAlert.classList.remove('show');
 
-      const payload = {
-        name: document.getElementById('agentName').value.trim(),
-        description: document.getElementById('agentDesc').value.trim(),
-        tags: document.getElementById('agentTags').value.split(',').map(t => t.trim()).filter(Boolean),
-        creator: document.getElementById('creatorAddr').value.trim(),
-      };
+      try {
+        const result = await registerAgent({
+          name,
+          description,
+          category,
+          capabilities: tags,
+          creator: $('#creator-address').value.trim() || undefined,
+          endpoint: $('#agent-endpoint').value.trim() || undefined,
+        });
 
-      const result = await registerAgent(payload);
-
-      if (result && result.success !== false) {
-        form.style.display = 'none';
-        document.getElementById('newAgentId').textContent = result.agentId || result.id || 'unknown';
-        successCard.style.display = 'block';
-      } else {
+        if (result && (result.success || result.agent)) {
+          const agentId = result.agent?.id || result.id || 'unknown';
+          showSuccess(`Agent "${name}" registered successfully! ID: ${agentId}`);
+          form.reset();
+          tags.length = 0;
+          renderTags();
+          descCount.textContent = '0';
+        } else {
+          showError('Registration failed. Please try again.');
+        }
+      } catch (err) {
+        showError(`Error: ${err.message}`);
+      } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Register Agent';
-        alert('Registration failed. Please try again.');
+        submitText.textContent = 'Register Agent';
+        submitSpinner.classList.add('hidden');
       }
     });
+
+    function showSuccess(msg) {
+      $('#success-message').textContent = msg;
+      successAlert.classList.add('show');
+      errorAlert.classList.remove('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showError(msg) {
+      $('#error-message').textContent = msg;
+      errorAlert.classList.add('show');
+      successAlert.classList.remove('show');
+    }
   </script>
+
 </body>
 </html>

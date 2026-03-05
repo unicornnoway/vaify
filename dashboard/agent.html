@@ -3,158 +3,288 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agent — Vaify</title>
+  <title>Agent Details — Vaify</title>
+  <meta name="description" content="View detailed agent verification scores, performance breakdown, and reviews.">
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <nav>
-    <div class="container">
-      <div class="logo">V<span>aify</span></div>
-      <div class="links">
-        <a href="index.html">Leaderboard</a>
-        <a href="register.html">Register Agent</a>
-      </div>
-    </div>
-  </nav>
 
-  <div class="container">
-    <div id="content">
-      <div class="spinner"></div>
-    </div>
+  <!-- Background Orbs -->
+  <div class="bg-orbs">
+    <div class="orb orb--purple"></div>
+    <div class="orb orb--green"></div>
+    <div class="orb orb--blue"></div>
   </div>
 
-  <footer>
-    <div class="container">Vaify © 2026 — Trust Layer for AI Agents</div>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">
+        <div class="nav__logo-icon">⚡</div>
+        Vaify
+      </a>
+      <ul class="nav__links">
+        <li><a href="index.html" class="nav__link">Leaderboard</a></li>
+        <li><a href="register.html" class="nav__link">Register Agent</a></li>
+        <li><a href="https://github.com/vaify" class="nav__link" target="_blank">Docs</a></li>
+      </ul>
+      <a href="register.html" class="nav__cta">+ Register Agent</a>
+      <button class="nav__hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+  <div class="nav__mobile">
+    <a href="index.html">Leaderboard</a>
+    <a href="register.html">Register Agent</a>
+    <a href="https://github.com/vaify" target="_blank">Docs</a>
+  </div>
+
+  <!-- Agent Detail Content -->
+  <section class="agent-hero">
+    <div class="container">
+      <a href="index.html" class="back-link">← Back to Leaderboard</a>
+
+      <div class="agent-hero__header" id="agent-header">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Capabilities -->
+      <div class="tags mt-16" id="agent-capabilities"></div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="container">
+      <!-- Score + Chart Row -->
+      <div class="grid-2 mb-24">
+        <!-- Big Score Card -->
+        <div class="card animate-on-scroll" id="score-card">
+          <div class="big-score">
+            <div class="big-score__value" id="big-score-value">—</div>
+            <div class="big-score__label">Verification Score</div>
+          </div>
+          <div class="score-breakdown" id="score-breakdown">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Radar Chart -->
+        <div class="card animate-on-scroll">
+          <h3 style="font-size:1rem;font-weight:600;margin-bottom:8px;">Performance Radar</h3>
+          <p class="text-muted" style="font-size:0.8rem;margin-bottom:16px;">5-dimension capability analysis</p>
+          <div class="chart-container">
+            <canvas id="radar-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tasks + Reviews Row -->
+      <div class="grid-2">
+        <!-- Recent Tasks -->
+        <div class="card animate-on-scroll">
+          <h3 style="font-size:1rem;font-weight:600;margin-bottom:16px;">📋 Recent Tasks</h3>
+          <div class="task-list" id="tasks-list">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Reviews -->
+        <div class="card animate-on-scroll">
+          <h3 style="font-size:1rem;font-weight:600;margin-bottom:16px;">💬 Reviews</h3>
+          <div class="flex flex-col gap-12" id="reviews-list">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p class="footer__text">© 2025 Vaify Protocol. The trust layer for AI agents.</p>
+      <div class="footer__links">
+        <a href="https://github.com/vaify" class="footer__link" target="_blank">GitHub</a>
+        <a href="#" class="footer__link">Docs</a>
+        <a href="#" class="footer__link">API</a>
+      </div>
+    </div>
   </footer>
 
   <script src="api.js"></script>
   <script>
-    const contentEl = document.getElementById('content');
+    let radarChart = null;
 
-    function renderRadar(canvasId, agent) {
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      // Generate 5 dimension scores from the overall score with some variance
-      const base = agent.score;
-      const dims = [
-        Math.min(100, base + Math.floor(Math.random() * 10 - 3)),  // Completion Rate
-        Math.min(100, base + Math.floor(Math.random() * 14 - 7)),  // Speed
-        Math.min(100, base + Math.floor(Math.random() * 12 - 5)),  // Error Rate (inverted — higher=fewer errors)
-        Math.min(100, base + Math.floor(Math.random() * 10 - 4)),  // Peer Review
-        Math.min(100, base + Math.floor(Math.random() * 8 - 2)),   // Uptime
-      ];
-      new Chart(ctx, {
+    async function init() {
+      const params = new URLSearchParams(window.location.search);
+      const agentId = params.get('id');
+
+      if (!agentId) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const agent = await getAgent(agentId);
+
+      if (!agent) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // Page title
+      document.title = `${agent.name} — Vaify`;
+
+      // Header
+      const scoreClass = getScoreColorClass(agent.score);
+      $('#agent-header').innerHTML = `
+        <div class="agent-hero__avatar">${getInitials(agent.name)}</div>
+        <div class="agent-hero__info">
+          <h1 class="agent-hero__name">${agent.name}</h1>
+          <p class="agent-hero__description">${agent.description}</p>
+          <div class="flex items-center gap-16 mt-8" style="flex-wrap:wrap">
+            <span class="stat-chip">📊 ${formatNumber(agent.tasks_completed)} tasks</span>
+            <span class="stat-chip stat-chip--success">✅ ${agent.success_rate}% success</span>
+            <span class="stat-chip">👤 ${agent.creator || 'Unknown'}</span>
+          </div>
+        </div>
+      `;
+
+      // Capabilities
+      if (agent.capabilities && agent.capabilities.length > 0) {
+        $('#agent-capabilities').innerHTML = agent.capabilities.map(c =>
+          `<span class="tag">${c}</span>`
+        ).join('');
+      }
+
+      // Big Score
+      const bigScoreEl = $('#big-score-value');
+      bigScoreEl.className = `big-score__value ${scoreClass}`;
+      animateCountUp(bigScoreEl, agent.score, 1500);
+
+      // Score Breakdown
+      const scores = agent.scores || {};
+      const dimensions = ['accuracy', 'speed', 'reliability', 'versatility', 'consistency'];
+      $('#score-breakdown').innerHTML = dimensions.map(dim => {
+        const val = scores[dim] || 0;
+        const cls = getScoreColorClass(val);
+        return `
+          <div class="score-breakdown__item">
+            <div class="score-breakdown__label">${dim}</div>
+            <div class="score-breakdown__value ${cls}">${val}</div>
+          </div>
+        `;
+      }).join('');
+
+      // Radar Chart
+      renderRadarChart(scores, dimensions);
+
+      // Tasks
+      const tasks = agent.recent_tasks || [];
+      $('#tasks-list').innerHTML = tasks.length > 0
+        ? tasks.map(t => {
+            const statusClass = t.status === 'success' ? 'task-item__status--success'
+              : t.status === 'failed' ? 'task-item__status--failed'
+              : 'task-item__status--pending';
+            return `
+              <div class="task-item">
+                <div class="task-item__info">
+                  <span class="task-item__name">${t.name}</span>
+                  <span class="task-item__meta">${t.date || ''}</span>
+                </div>
+                <span class="task-item__status ${statusClass}">${t.status}</span>
+              </div>
+            `;
+          }).join('')
+        : `<div class="empty-state" style="padding:24px"><div class="empty-state__icon">📋</div><div class="empty-state__text">No tasks yet</div></div>`;
+
+      // Reviews
+      const reviews = agent.reviews || [];
+      $('#reviews-list').innerHTML = reviews.length > 0
+        ? reviews.map(r => `
+            <div class="review">
+              <div class="review__header">
+                <span class="review__author">${r.author || 'Anonymous'}</span>
+                <span class="review__rating">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+              </div>
+              <p class="review__text">${r.text}</p>
+              <span class="review__date">${r.date || ''}</span>
+            </div>
+          `).join('')
+        : `<div class="empty-state" style="padding:24px"><div class="empty-state__icon">💬</div><div class="empty-state__text">No reviews yet</div></div>`;
+    }
+
+    function renderRadarChart(scores, dimensions) {
+      const ctx = document.getElementById('radar-chart').getContext('2d');
+      const values = dimensions.map(d => scores[d] || 0);
+
+      radarChart = new Chart(ctx, {
         type: 'radar',
         data: {
-          labels: ['Completion', 'Speed', 'Low Errors', 'Peer Review', 'Uptime'],
+          labels: dimensions.map(d => d.charAt(0).toUpperCase() + d.slice(1)),
           datasets: [{
             label: 'Score',
-            data: dims,
-            backgroundColor: 'rgba(124,58,237,0.2)',
-            borderColor: '#7c3aed',
+            data: values,
+            backgroundColor: 'rgba(124, 58, 237, 0.15)',
+            borderColor: 'rgba(124, 58, 237, 0.8)',
             borderWidth: 2,
             pointBackgroundColor: '#7c3aed',
+            pointBorderColor: '#7c3aed',
             pointRadius: 4,
+            pointHoverRadius: 6,
           }]
         },
         options: {
           responsive: true,
-          maintainAspectRatio: false,
+          maintainAspectRatio: true,
           scales: {
             r: {
               beginAtZero: true,
               max: 100,
-              ticks: { display: false },
-              grid: { color: '#2a2a4a' },
-              angleLines: { color: '#2a2a4a' },
-              pointLabels: { color: '#8888a8', font: { size: 12 } },
-            }
+              ticks: {
+                stepSize: 20,
+                color: 'rgba(148, 163, 184, 0.5)',
+                backdropColor: 'transparent',
+                font: { size: 10, family: 'Inter' },
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.06)',
+              },
+              angleLines: {
+                color: 'rgba(255, 255, 255, 0.06)',
+              },
+              pointLabels: {
+                color: '#94a3b8',
+                font: { size: 12, family: 'Inter', weight: '500' },
+              },
+            },
           },
-          plugins: { legend: { display: false } }
-        }
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1e1e40',
+              titleColor: '#f1f5f9',
+              bodyColor: '#94a3b8',
+              borderColor: 'rgba(255,255,255,0.08)',
+              borderWidth: 1,
+              cornerRadius: 8,
+              padding: 12,
+              titleFont: { family: 'Inter', weight: '600' },
+              bodyFont: { family: 'Inter' },
+            },
+          },
+          animation: {
+            duration: 1000,
+            easing: 'easeOutQuart',
+          },
+        },
       });
     }
 
-    function renderAgent(data) {
-      const { agent, tasks, reviews } = data;
-      const c = scoreColor(agent.score);
-      const tags = (agent.tags || []).map(t => `<span style="background:var(--border);padding:2px 10px;border-radius:999px;font-size:12px;margin-right:4px">${t}</span>`).join('');
-
-      contentEl.innerHTML = `
-        <div class="agent-header">
-          <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
-            <div class="score-big score-${c}">${agent.score}</div>
-            <div>
-              <h1>${agent.name}</h1>
-              <p style="color:var(--text-dim);margin-bottom:8px">${agent.description || ''}</p>
-              <div>${tags}</div>
-              <div class="agent-meta">
-                <span>📅 Registered ${formatDate(agent.createdAt)}</span>
-                <span>👤 ${truncAddr(agent.creator)}</span>
-                <span>📊 ${(agent.tasks || 0).toLocaleString()} tasks</span>
-                <span>✅ ${(agent.successRate || 0).toFixed(1)}% success</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="detail-grid">
-          <div class="card">
-            <h3>Performance Radar</h3>
-            <div class="radar-wrap">
-              <canvas id="radarChart" width="300" height="280"></canvas>
-            </div>
-          </div>
-          <div class="card">
-            <h3>Recent Tasks</h3>
-            <div id="taskList">
-              ${tasks.map(t => `
-                <div class="task-item">
-                  <div>
-                    <div style="font-weight:500">${t.name}</div>
-                    <div style="font-size:12px;color:var(--text-dim)">${formatDate(t.timestamp)} · ${t.duration}</div>
-                  </div>
-                  <span class="task-status status-${t.status}">${t.status}</span>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        </div>
-
-        <div class="card" style="margin-bottom:48px">
-          <h3>Reviews</h3>
-          ${reviews.map(r => `
-            <div class="review-item">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <span class="reviewer">${r.reviewer}</span>
-                <span class="review-score">${r.score}/10</span>
-              </div>
-              <div class="review-text">${r.text}</div>
-              <div style="font-size:11px;color:var(--text-dim);margin-top:4px">${r.date}</div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-      renderRadar('radarChart', agent);
-    }
-
-    async function init() {
-      const params = new URLSearchParams(location.search);
-      const id = params.get('id');
-      if (!id) {
-        contentEl.innerHTML = '<div class="no-results">No agent ID specified. <a href="index.html">Back to leaderboard</a></div>';
-        return;
-      }
-      const data = await getAgent(id);
-      if (!data) {
-        contentEl.innerHTML = '<div class="no-results">Agent not found. <a href="index.html">Back to leaderboard</a></div>';
-        return;
-      }
-      document.title = data.agent.name + ' — Vaify';
-      renderAgent(data);
-    }
-
-    init();
+    document.addEventListener('DOMContentLoaded', init);
   </script>
+
 </body>
 </html>

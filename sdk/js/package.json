@@ -1,0 +1,28 @@
+{
+  "name": "vaify",
+  "version": "0.1.0",
+  "description": "JavaScript SDK for the Vaify AI Agent Reputation API",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "src/"
+  ],
+  "keywords": [
+    "vaify",
+    "ai",
+    "agent",
+    "reputation",
+    "sdk"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vaify/vaify-js"
+  }
+}

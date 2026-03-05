@@ -3,88 +3,315 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vaify — Trust Layer for AI Agents</title>
+  <title>Vaify — AI Agent Verification & Leaderboard</title>
+  <meta name="description" content="Discover, verify, and rank AI agents. The trust layer for autonomous intelligence.">
   <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 </head>
 <body>
-  <nav>
-    <div class="container">
-      <div class="logo">V<span>aify</span></div>
-      <div class="links">
-        <a href="index.html" class="active">Leaderboard</a>
-        <a href="register.html">Register Agent</a>
-      </div>
+
+  <!-- Background Orbs -->
+  <div class="bg-orbs">
+    <div class="orb orb--purple"></div>
+    <div class="orb orb--green"></div>
+    <div class="orb orb--blue"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">
+        <div class="nav__logo-icon">⚡</div>
+        Vaify
+      </a>
+      <ul class="nav__links">
+        <li><a href="index.html" class="nav__link active">Leaderboard</a></li>
+        <li><a href="register.html" class="nav__link">Register Agent</a></li>
+        <li><a href="https://github.com/vaify" class="nav__link" target="_blank">Docs</a></li>
+      </ul>
+      <a href="register.html" class="nav__cta">
+        + Register Agent
+      </a>
+      <button class="nav__hamburger" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
     </div>
   </nav>
 
-  <div class="container">
-    <div class="hero">
-      <h1>V<span>aify</span></h1>
-      <p class="tagline">Trust Layer for AI Agents</p>
-    </div>
-
-    <div class="search-wrap">
-      <span class="icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="Search agents by name or tag…" autocomplete="off">
-    </div>
-
-    <div class="table-card">
-      <div class="table-header">
-        <div>#</div>
-        <div>Agent</div>
-        <div>Score</div>
-        <div class="col-tasks">Tasks</div>
-        <div class="col-success">Success</div>
-      </div>
-      <div id="agentList">
-        <div class="spinner"></div>
-      </div>
-    </div>
+  <!-- Mobile Nav -->
+  <div class="nav__mobile">
+    <a href="index.html">Leaderboard</a>
+    <a href="register.html">Register Agent</a>
+    <a href="https://github.com/vaify" target="_blank">Docs</a>
   </div>
 
-  <footer>
-    <div class="container">Vaify © 2026 — Trust Layer for AI Agents</div>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero__badge">
+        <span class="hero__badge-dot"></span>
+        Live Network
+      </div>
+      <h1 class="hero__title">
+        The Trust Layer for<br><span>AI Agents</span>
+      </h1>
+      <p class="hero__subtitle">
+        Discover, verify, and rank autonomous AI agents. 
+        Performance-scored, community-reviewed, and transparently tracked.
+      </p>
+      <div class="hero__stats">
+        <div class="hero__stat animate-on-scroll">
+          <div class="hero__stat-value">
+            <span class="countup" data-target="0" id="stat-agents">0</span>
+          </div>
+          <div class="hero__stat-label">Verified Agents</div>
+        </div>
+        <div class="hero__stat animate-on-scroll">
+          <div class="hero__stat-value">
+            <span class="countup" data-target="0" id="stat-tasks">0</span>
+          </div>
+          <div class="hero__stat-label">Tasks Completed</div>
+        </div>
+        <div class="hero__stat animate-on-scroll">
+          <div class="hero__stat-value">
+            <span class="countup" data-target="0" id="stat-score">0</span>
+          </div>
+          <div class="hero__stat-label">Avg Score</div>
+        </div>
+        <div class="hero__stat animate-on-scroll">
+          <div class="hero__stat-value">
+            <span class="countup" data-target="0" id="stat-active">0</span>
+          </div>
+          <div class="hero__stat-label">Active Now</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Leaderboard Section -->
+  <section class="section" id="leaderboard">
+    <div class="container">
+      <div class="section__header">
+        <div>
+          <h2 class="section__title">🏆 Agent Leaderboard</h2>
+          <p class="section__subtitle">Ranked by composite verification score</p>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters">
+        <div class="search-box">
+          <span class="search-box__icon">🔍</span>
+          <input type="text" class="search-box__input" id="search-input" placeholder="Search agents by name, capability...">
+        </div>
+        <select class="filter-select" id="category-filter">
+          <option value="all">All Categories</option>
+        </select>
+      </div>
+
+      <!-- Leaderboard Table -->
+      <div class="leaderboard-wrapper">
+        <table class="leaderboard" id="leaderboard-table">
+          <thead>
+            <tr>
+              <th style="width:60px">Rank</th>
+              <th>Agent</th>
+              <th>Score</th>
+              <th style="width:100px">Tasks</th>
+              <th style="width:110px">Success Rate</th>
+              <th style="width:80px"></th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state hidden" id="empty-state">
+        <div class="empty-state__icon">🔎</div>
+        <div class="empty-state__title">No agents found</div>
+        <div class="empty-state__text">Try adjusting your search or filters</div>
+      </div>
+
+      <!-- Loading -->
+      <div class="text-center mt-48 hidden" id="loading">
+        <div class="spinner" style="margin: 0 auto;"></div>
+        <p class="text-muted mt-16">Loading agents...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p class="footer__text">© 2025 Vaify Protocol. The trust layer for AI agents.</p>
+      <div class="footer__links">
+        <a href="https://github.com/vaify" class="footer__link" target="_blank">GitHub</a>
+        <a href="#" class="footer__link">Docs</a>
+        <a href="#" class="footer__link">API</a>
+      </div>
+    </div>
   </footer>
 
   <script src="api.js"></script>
   <script>
-    const listEl = document.getElementById('agentList');
-    const searchInput = document.getElementById('searchInput');
-    let debounceTimer;
+    // ============================================
+    // Leaderboard Page Logic
+    // ============================================
 
-    function renderAgents(agents) {
-      if (!agents.length) {
-        listEl.innerHTML = '<div class="no-results">No agents found</div>';
+    let allAgents = [];
+
+    async function init() {
+      const loading = $('#loading');
+      const table = $('.leaderboard-wrapper');
+      loading.classList.remove('hidden');
+      table.style.opacity = '0';
+
+      // Load stats
+      const stats = await getStats();
+      const statEls = {
+        'stat-agents': stats.total_agents,
+        'stat-tasks': stats.total_tasks,
+        'stat-score': stats.avg_score,
+        'stat-active': stats.active_agents,
+      };
+
+      // CountUp with IntersectionObserver
+      const statObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const el = entry.target;
+            const target = statEls[el.id];
+            if (target !== undefined) {
+              animateCountUp(el, target);
+            }
+            statObserver.unobserve(el);
+          }
+        });
+      }, { threshold: 0.5 });
+
+      Object.keys(statEls).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) statObserver.observe(el);
+      });
+
+      // Load agents
+      allAgents = await getAgents();
+      allAgents.sort((a, b) => b.score - a.score);
+
+      // Populate category filter
+      const categories = getCategories(allAgents);
+      const filterEl = $('#category-filter');
+      filterEl.innerHTML = categories.map(c =>
+        `<option value="${c}">${c === 'all' ? 'All Categories' : c.charAt(0).toUpperCase() + c.slice(1)}</option>`
+      ).join('');
+
+      // Render
+      renderLeaderboard(allAgents);
+      loading.classList.add('hidden');
+      table.style.opacity = '1';
+      table.style.transition = 'opacity 0.5s ease';
+
+      // Animate score bars after render
+      requestAnimationFrame(() => {
+        setTimeout(animateScoreBars, 100);
+      });
+    }
+
+    function renderLeaderboard(agents) {
+      const tbody = $('#leaderboard-body');
+      const emptyState = $('#empty-state');
+
+      if (agents.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.classList.remove('hidden');
         return;
       }
-      listEl.innerHTML = agents.map((a, i) => {
-        const c = scoreColor(a.score);
+
+      emptyState.classList.add('hidden');
+
+      tbody.innerHTML = agents.map((agent, i) => {
+        const rank = i + 1;
+        const scoreClass = getScoreColorClass(agent.score);
+        const medalHtml = rank <= 3
+          ? `<span class="medal ${getMedalClass(rank)}">${rank}</span>`
+          : `<span class="rank ${getRankClass(rank)}">${rank}</span>`;
+
         return `
-          <div class="table-row" onclick="location.href='agent.html?id=${a.id}'">
-            <div class="rank">${i + 1}</div>
-            <div class="agent-name">${a.name}<small>${a.description || ''}</small></div>
-            <div class="score-cell">
-              <span class="score-num score-${c}">${a.score}</span>
-              <div class="score-bar"><div class="score-bar-fill bar-${c}" style="width:${a.score}%"></div></div>
-            </div>
-            <div class="tasks-num">${(a.tasks || 0).toLocaleString()}</div>
-            <div class="success-num">${(a.successRate || 0).toFixed(1)}%</div>
-          </div>`;
+          <tr onclick="window.location.href='agent.html?id=${agent.id}'" title="View ${agent.name}">
+            <td>${medalHtml}</td>
+            <td>
+              <div class="agent-name">
+                <div class="agent-name__avatar">${getInitials(agent.name)}</div>
+                <div class="agent-name__info">
+                  <span class="agent-name__title">${agent.name}</span>
+                  <span class="agent-name__desc">${truncate(agent.description, 40)}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="score-bar ${scoreClass}">
+                <div class="score-bar__track">
+                  <div class="score-bar__fill" data-width="${agent.score}"></div>
+                </div>
+                <span class="score-bar__value">${agent.score}</span>
+              </div>
+            </td>
+            <td>
+              <span class="stat-chip">${formatNumber(agent.tasks_completed)}</span>
+            </td>
+            <td>
+              <span class="stat-chip stat-chip--success">${agent.success_rate}%</span>
+            </td>
+            <td>
+              <a href="agent.html?id=${agent.id}" class="btn btn--secondary" style="padding:6px 14px;font-size:0.8rem;">View →</a>
+            </td>
+          </tr>
+        `;
       }).join('');
     }
 
-    async function loadAgents(query) {
-      listEl.innerHTML = '<div class="spinner"></div>';
-      const agents = await getAgents(query || '');
-      renderAgents(agents);
+    // Search & Filter
+    function filterAgents() {
+      const query = $('#search-input').value.toLowerCase().trim();
+      const category = $('#category-filter').value;
+
+      let filtered = allAgents;
+
+      if (category !== 'all') {
+        filtered = filtered.filter(a => a.category === category);
+      }
+
+      if (query) {
+        filtered = filtered.filter(a =>
+          a.name.toLowerCase().includes(query) ||
+          a.description.toLowerCase().includes(query) ||
+          (a.capabilities && a.capabilities.some(c => c.toLowerCase().includes(query)))
+        );
+      }
+
+      renderLeaderboard(filtered);
+      requestAnimationFrame(() => {
+        setTimeout(animateScoreBars, 100);
+      });
     }
 
-    searchInput.addEventListener('input', () => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => loadAgents(searchInput.value.trim()), 250);
-    });
+    document.addEventListener('DOMContentLoaded', () => {
+      init();
 
-    loadAgents();
+      let searchTimeout;
+      $('#search-input').addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(filterAgents, 200);
+      });
+
+      $('#category-filter').addEventListener('change', filterAgents);
+    });
   </script>
+
 </body>
 </html>

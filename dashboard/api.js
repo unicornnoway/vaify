@@ -1,124 +1,333 @@
-/* ========== Vaify Dashboard — API + Mock Data ========== */
+// ============================================
+// VAIFY API Client
+// ============================================
 
-const API_BASE = 'http://localhost:3000/api/v1';
+const API_BASE = 'http://161.118.251.173:3000';
+const API_TIMEOUT = 3000;
 
-// ---- Mock Data ----
+// ============================================
+// Mock Data (fallback)
+// ============================================
 const MOCK_AGENTS = [
-  { id: 'agent-001', name: 'OracleGPT',      description: 'Market analysis & prediction agent',       score: 96, tasks: 1842, successRate: 98.2, creator: '0x7a3b...f29d', createdAt: '2025-11-02', tags: ['analytics','prediction','finance'] },
-  { id: 'agent-002', name: 'CodeWeaver',      description: 'Autonomous code review & generation',      score: 94, tasks: 3201, successRate: 97.1, creator: '0x1f8c...a3e1', createdAt: '2025-10-15', tags: ['coding','review','automation'] },
-  { id: 'agent-003', name: 'SentinelBot',     description: 'On-chain security monitoring agent',        score: 91, tasks: 5620, successRate: 99.5, creator: '0x9d2a...b7c4', createdAt: '2025-09-20', tags: ['security','monitoring','defi'] },
-  { id: 'agent-004', name: 'DataMiner',       description: 'Large-scale data extraction & ETL',         score: 88, tasks: 2150, successRate: 94.3, creator: '0x4e7f...d012', createdAt: '2025-12-01', tags: ['data','etl','scraping'] },
-  { id: 'agent-005', name: 'TradeNinja',      description: 'High-frequency trading executor',           score: 85, tasks: 12400, successRate: 91.8, creator: '0xab3c...8f56', createdAt: '2025-08-30', tags: ['trading','defi','execution'] },
-  { id: 'agent-006', name: 'LegalEagle',      description: 'Contract analysis & compliance checker',    score: 83, tasks: 890, successRate: 96.7, creator: '0x2d1e...c4a9', createdAt: '2025-11-18', tags: ['legal','compliance','analysis'] },
-  { id: 'agent-007', name: 'PixelForge',      description: 'AI image generation & editing pipeline',    score: 80, tasks: 4500, successRate: 89.2, creator: '0x6b8d...e123', createdAt: '2025-10-05', tags: ['image','generation','creative'] },
-  { id: 'agent-008', name: 'NexusRouter',     description: 'Cross-chain bridge & routing optimizer',    score: 78, tasks: 7800, successRate: 93.0, creator: '0x3f9a...7b82', createdAt: '2025-09-12', tags: ['bridge','routing','defi'] },
-  { id: 'agent-009', name: 'EchoScribe',      description: 'Meeting transcription & summarization',     score: 76, tasks: 2300, successRate: 88.5, creator: '0xc5e2...d4f1', createdAt: '2025-12-10', tags: ['transcription','nlp','productivity'] },
-  { id: 'agent-010', name: 'GuardianAI',      description: 'Wallet security & phishing detection',      score: 92, tasks: 6100, successRate: 99.1, creator: '0x8a1d...b3e7', createdAt: '2025-08-15', tags: ['security','wallet','detection'] },
-  { id: 'agent-011', name: 'YieldHunter',     description: 'DeFi yield optimization strategist',        score: 74, tasks: 3400, successRate: 86.2, creator: '0xd7f3...a290', createdAt: '2025-11-25', tags: ['defi','yield','strategy'] },
-  { id: 'agent-012', name: 'SynthVoice',      description: 'Multi-language voice synthesis agent',      score: 71, tasks: 1560, successRate: 90.8, creator: '0x5c4b...f8d3', createdAt: '2025-10-22', tags: ['voice','tts','multilingual'] },
-  { id: 'agent-013', name: 'ChainIndexer',    description: 'Blockchain data indexing & query service',  score: 87, tasks: 9200, successRate: 95.6, creator: '0xe6a8...c1b4', createdAt: '2025-09-01', tags: ['indexing','blockchain','data'] },
-  { id: 'agent-014', name: 'NewsHawk',        description: 'Real-time news aggregation & analysis',     score: 68, tasks: 4100, successRate: 82.4, creator: '0x1b9e...d5a7', createdAt: '2025-12-05', tags: ['news','aggregation','nlp'] },
-  { id: 'agent-015', name: 'FormFiller',      description: 'Automated form completion & submission',    score: 63, tasks: 780, successRate: 79.5, creator: '0xa2c7...e6f0', createdAt: '2025-11-08', tags: ['automation','forms','rpa'] },
-  { id: 'agent-016', name: 'TokenScout',      description: 'New token discovery & risk assessment',     score: 82, tasks: 5300, successRate: 91.2, creator: '0x7d4f...b8c2', createdAt: '2025-10-30', tags: ['tokens','research','risk'] },
-  { id: 'agent-017', name: 'BugSweeper',      description: 'Automated vulnerability scanner',           score: 55, tasks: 620, successRate: 72.1, creator: '0x3e8a...d9f5', createdAt: '2025-12-15', tags: ['security','scanning','bugs'] },
-  { id: 'agent-018', name: 'CalendarSync',    description: 'Cross-platform calendar management',        score: 47, tasks: 340, successRate: 65.3, creator: '0xf1b6...a4e8', createdAt: '2025-11-30', tags: ['calendar','sync','productivity'] },
-  { id: 'agent-019', name: 'WhaleTracker',    description: 'Large wallet movement alerts',              score: 89, tasks: 8900, successRate: 96.8, creator: '0x6c3d...f7a1', createdAt: '2025-08-22', tags: ['tracking','whales','alerts'] },
-  { id: 'agent-020', name: 'DocParser',       description: 'PDF & document structure extraction',       score: 73, tasks: 1900, successRate: 87.3, creator: '0xb5e9...c2d6', createdAt: '2025-10-11', tags: ['documents','parsing','ocr'] },
+  { id: 'agent-001', name: 'NexusAI', description: 'Advanced reasoning and code generation agent', score: 97, tasks_completed: 2847, success_rate: 98.2, capabilities: ['code-generation', 'reasoning', 'debugging', 'architecture'], category: 'development', creator: '0x7a3b...f91c', scores: { accuracy: 98, speed: 95, reliability: 97, versatility: 96, consistency: 98 }, reviews: [{ author: '0xabc...123', rating: 5, text: 'Exceptional code quality and reasoning.', date: '2025-03-01' }], recent_tasks: [{ name: 'Smart contract audit', status: 'success', date: '2025-03-04' }, { name: 'API integration', status: 'success', date: '2025-03-03' }] },
+  { id: 'agent-002', name: 'OracleBot', description: 'Real-time data analysis and market intelligence', score: 94, tasks_completed: 3201, success_rate: 96.8, capabilities: ['data-analysis', 'market-intel', 'forecasting', 'reporting'], category: 'analytics', creator: '0x3f1a...e82d', scores: { accuracy: 96, speed: 92, reliability: 94, versatility: 91, consistency: 95 }, reviews: [{ author: '0xdef...456', rating: 5, text: 'Best analytics agent in the ecosystem.', date: '2025-02-28' }], recent_tasks: [{ name: 'Market trend analysis', status: 'success', date: '2025-03-04' }, { name: 'Portfolio optimization', status: 'success', date: '2025-03-03' }] },
+  { id: 'agent-003', name: 'SentinelX', description: 'Security monitoring and threat detection specialist', score: 92, tasks_completed: 1956, success_rate: 97.5, capabilities: ['security', 'monitoring', 'threat-detection', 'incident-response'], category: 'security', creator: '0x9c2e...a47b', scores: { accuracy: 95, speed: 88, reliability: 96, versatility: 85, consistency: 96 }, reviews: [{ author: '0xghi...789', rating: 4, text: 'Reliable security monitoring.', date: '2025-02-25' }], recent_tasks: [{ name: 'Vulnerability scan', status: 'success', date: '2025-03-04' }, { name: 'Threat assessment', status: 'success', date: '2025-03-02' }] },
+  { id: 'agent-004', name: 'PolyglotAI', description: 'Multi-language translation and content localization', score: 91, tasks_completed: 4520, success_rate: 95.1, capabilities: ['translation', 'localization', 'content-writing', 'nlp'], category: 'language', creator: '0x5d8f...c31a', scores: { accuracy: 93, speed: 94, reliability: 90, versatility: 89, consistency: 88 }, reviews: [{ author: '0xjkl...012', rating: 5, text: 'Handles 40+ languages flawlessly.', date: '2025-02-20' }], recent_tasks: [{ name: 'Docs localization (JP)', status: 'success', date: '2025-03-04' }, { name: 'Marketing copy (ES)', status: 'success', date: '2025-03-03' }] },
+  { id: 'agent-005', name: 'AutoDeploy', description: 'CI/CD pipeline automation and infrastructure management', score: 89, tasks_completed: 1834, success_rate: 94.7, capabilities: ['devops', 'ci-cd', 'infrastructure', 'monitoring'], category: 'development', creator: '0x1b4c...d95e', scores: { accuracy: 90, speed: 91, reliability: 88, versatility: 86, consistency: 89 }, reviews: [{ author: '0xmno...345', rating: 4, text: 'Great for automated deployments.', date: '2025-02-18' }], recent_tasks: [{ name: 'K8s cluster deploy', status: 'success', date: '2025-03-04' }, { name: 'Pipeline optimization', status: 'failed', date: '2025-03-02' }] },
+  { id: 'agent-006', name: 'CreativeForge', description: 'AI art generation and creative design assistant', score: 87, tasks_completed: 5612, success_rate: 92.3, capabilities: ['image-generation', 'design', 'branding', 'creative'], category: 'creative', creator: '0x6e7a...b28f', scores: { accuracy: 85, speed: 90, reliability: 86, versatility: 92, consistency: 84 }, reviews: [{ author: '0xpqr...678', rating: 4, text: 'Stunning visual outputs.', date: '2025-02-15' }], recent_tasks: [{ name: 'Brand identity design', status: 'success', date: '2025-03-04' }, { name: 'NFT collection', status: 'success', date: '2025-03-01' }] },
+  { id: 'agent-007', name: 'DataWeaver', description: 'ETL pipelines and data warehouse management', score: 86, tasks_completed: 1245, success_rate: 93.8, capabilities: ['etl', 'data-warehouse', 'sql', 'data-modeling'], category: 'analytics', creator: '0x8f3d...e61c', scores: { accuracy: 89, speed: 83, reliability: 88, versatility: 82, consistency: 87 }, reviews: [{ author: '0xstu...901', rating: 4, text: 'Solid data pipeline management.', date: '2025-02-12' }], recent_tasks: [{ name: 'Data migration', status: 'success', date: '2025-03-03' }, { name: 'Schema optimization', status: 'success', date: '2025-03-01' }] },
+  { id: 'agent-008', name: 'LegalMind', description: 'Contract analysis and legal document processing', score: 85, tasks_completed: 892, success_rate: 96.2, capabilities: ['legal', 'contract-analysis', 'compliance', 'document-processing'], category: 'professional', creator: '0x2a5b...f73d', scores: { accuracy: 92, speed: 78, reliability: 88, versatility: 76, consistency: 90 }, reviews: [{ author: '0xvwx...234', rating: 5, text: 'Saved us thousands in legal review costs.', date: '2025-02-10' }], recent_tasks: [{ name: 'Contract review (NDA)', status: 'success', date: '2025-03-04' }, { name: 'Compliance check', status: 'success', date: '2025-03-02' }] },
+  { id: 'agent-009', name: 'TradeBot', description: 'Algorithmic trading strategies and portfolio management', score: 83, tasks_completed: 12450, success_rate: 91.5, capabilities: ['trading', 'portfolio', 'risk-management', 'backtesting'], category: 'finance', creator: '0x4c8e...a92f', scores: { accuracy: 85, speed: 88, reliability: 82, versatility: 78, consistency: 80 }, reviews: [{ author: '0xyza...567', rating: 4, text: 'Consistent returns with managed risk.', date: '2025-02-08' }], recent_tasks: [{ name: 'Strategy backtest', status: 'success', date: '2025-03-04' }, { name: 'Position rebalance', status: 'success', date: '2025-03-03' }] },
+  { id: 'agent-010', name: 'MediScan', description: 'Medical image analysis and diagnostic support', score: 81, tasks_completed: 678, success_rate: 97.8, capabilities: ['medical-imaging', 'diagnostics', 'radiology', 'pathology'], category: 'healthcare', creator: '0x7d1f...b45c', scores: { accuracy: 94, speed: 72, reliability: 86, versatility: 68, consistency: 82 }, reviews: [{ author: '0xbcd...890', rating: 5, text: 'Incredible accuracy on imaging tasks.', date: '2025-02-05' }], recent_tasks: [{ name: 'X-ray analysis', status: 'success', date: '2025-03-04' }, { name: 'CT scan review', status: 'success', date: '2025-03-03' }] },
+  { id: 'agent-011', name: 'ContentPilot', description: 'Blog writing, SEO optimization, and content strategy', score: 79, tasks_completed: 3890, success_rate: 89.4, capabilities: ['content-writing', 'seo', 'copywriting', 'strategy'], category: 'creative', creator: '0x9e2a...c67d', scores: { accuracy: 80, speed: 85, reliability: 78, versatility: 82, consistency: 76 }, reviews: [{ author: '0xefg...123', rating: 3, text: 'Good content but needs human editing.', date: '2025-02-03' }], recent_tasks: [{ name: 'Blog post series', status: 'success', date: '2025-03-04' }, { name: 'SEO audit', status: 'success', date: '2025-03-02' }] },
+  { id: 'agent-012', name: 'ChainGuard', description: 'Smart contract auditing and blockchain security', score: 78, tasks_completed: 456, success_rate: 95.6, capabilities: ['smart-contracts', 'auditing', 'blockchain', 'solidity'], category: 'security', creator: '0x3f5c...d89a', scores: { accuracy: 86, speed: 70, reliability: 82, versatility: 72, consistency: 78 }, reviews: [{ author: '0xhij...456', rating: 4, text: 'Found critical vulnerabilities others missed.', date: '2025-01-30' }], recent_tasks: [{ name: 'DeFi protocol audit', status: 'success', date: '2025-03-03' }, { name: 'Token contract review', status: 'success', date: '2025-03-01' }] },
+  { id: 'agent-013', name: 'VoiceForge', description: 'Text-to-speech synthesis and voice cloning', score: 76, tasks_completed: 2340, success_rate: 88.9, capabilities: ['tts', 'voice-cloning', 'audio-processing', 'speech'], category: 'creative', creator: '0x8a1d...e34b', scores: { accuracy: 78, speed: 82, reliability: 76, versatility: 74, consistency: 72 }, reviews: [{ author: '0xklm...789', rating: 4, text: 'Natural sounding voices.', date: '2025-01-28' }], recent_tasks: [{ name: 'Podcast narration', status: 'success', date: '2025-03-04' }, { name: 'Voice model training', status: 'pending', date: '2025-03-03' }] },
+  { id: 'agent-014', name: 'ResearchBot', description: 'Academic paper analysis and literature review', score: 74, tasks_completed: 1120, success_rate: 90.2, capabilities: ['research', 'literature-review', 'summarization', 'citation'], category: 'professional', creator: '0x5b9e...f12c', scores: { accuracy: 82, speed: 68, reliability: 76, versatility: 70, consistency: 74 }, reviews: [{ author: '0xnop...012', rating: 3, text: 'Good for initial literature surveys.', date: '2025-01-25' }], recent_tasks: [{ name: 'Paper summarization (50)', status: 'success', date: '2025-03-04' }, { name: 'Citation network analysis', status: 'failed', date: '2025-03-02' }] },
+  { id: 'agent-015', name: 'SupplyChainAI', description: 'Supply chain optimization and logistics planning', score: 72, tasks_completed: 890, success_rate: 87.5, capabilities: ['logistics', 'supply-chain', 'optimization', 'forecasting'], category: 'professional', creator: '0x2c4f...a78d', scores: { accuracy: 76, speed: 70, reliability: 74, versatility: 68, consistency: 72 }, reviews: [{ author: '0xqrs...345', rating: 3, text: 'Helpful for route optimization.', date: '2025-01-22' }], recent_tasks: [{ name: 'Route optimization', status: 'success', date: '2025-03-03' }, { name: 'Inventory forecast', status: 'success', date: '2025-03-01' }] },
+  { id: 'agent-016', name: 'EduBot', description: 'Personalized tutoring and educational content', score: 68, tasks_completed: 6780, success_rate: 85.3, capabilities: ['tutoring', 'education', 'quiz-generation', 'adaptive-learning'], category: 'education', creator: '0x6d8a...b45e', scores: { accuracy: 72, speed: 74, reliability: 66, versatility: 70, consistency: 64 }, reviews: [{ author: '0xtuv...678', rating: 3, text: 'Kids love the interactive quizzes.', date: '2025-01-20' }], recent_tasks: [{ name: 'Math curriculum gen', status: 'success', date: '2025-03-04' }, { name: 'Quiz generation', status: 'success', date: '2025-03-03' }] },
+  { id: 'agent-017', name: 'SocialPulse', description: 'Social media management and sentiment analysis', score: 65, tasks_completed: 4230, success_rate: 83.7, capabilities: ['social-media', 'sentiment-analysis', 'scheduling', 'analytics'], category: 'analytics', creator: '0x9f1b...c23d', scores: { accuracy: 68, speed: 72, reliability: 64, versatility: 66, consistency: 60 }, reviews: [{ author: '0xwxy...901', rating: 3, text: 'Decent scheduling, sentiment needs work.', date: '2025-01-18' }], recent_tasks: [{ name: 'Campaign analysis', status: 'success', date: '2025-03-04' }, { name: 'Content scheduling', status: 'failed', date: '2025-03-02' }] },
+  { id: 'agent-018', name: 'BugHunter', description: 'Automated testing and bug detection', score: 58, tasks_completed: 1567, success_rate: 79.8, capabilities: ['testing', 'qa', 'bug-detection', 'automation'], category: 'development', creator: '0x4e7c...d56a', scores: { accuracy: 62, speed: 60, reliability: 56, versatility: 54, consistency: 58 }, reviews: [{ author: '0xzab...234', rating: 2, text: 'Too many false positives.', date: '2025-01-15' }], recent_tasks: [{ name: 'Regression test suite', status: 'success', date: '2025-03-03' }, { name: 'E2E test generation', status: 'failed', date: '2025-03-01' }] },
+  { id: 'agent-019', name: 'ChatHelper', description: 'Customer support chatbot and FAQ management', score: 45, tasks_completed: 8900, success_rate: 74.2, capabilities: ['customer-support', 'chatbot', 'faq', 'ticketing'], category: 'professional', creator: '0x1a3b...e89f', scores: { accuracy: 48, speed: 56, reliability: 42, versatility: 44, consistency: 40 }, reviews: [{ author: '0xcde...567', rating: 2, text: 'Basic support, struggles with complex queries.', date: '2025-01-12' }], recent_tasks: [{ name: 'FAQ database update', status: 'success', date: '2025-03-04' }, { name: 'Chat flow redesign', status: 'pending', date: '2025-03-03' }] },
+  { id: 'agent-020', name: 'WeatherWise', description: 'Weather forecasting and climate data analysis', score: 38, tasks_completed: 2100, success_rate: 71.5, capabilities: ['weather', 'forecasting', 'climate', 'data-analysis'], category: 'analytics', creator: '0x8b2d...f14c', scores: { accuracy: 42, speed: 44, reliability: 36, versatility: 34, consistency: 38 }, reviews: [{ author: '0xfgh...890', rating: 2, text: 'Accuracy needs significant improvement.', date: '2025-01-10' }], recent_tasks: [{ name: '7-day forecast', status: 'success', date: '2025-03-04' }, { name: 'Climate model run', status: 'failed', date: '2025-03-02' }] },
 ];
 
-function mockTasksFor(agentId) {
-  const statuses = ['success','success','success','success','failed','pending'];
-  const taskNames = ['Process dataset batch','API health check','Model inference run','Security audit','Data sync','Report generation','Token transfer','Index rebuild'];
-  const tasks = [];
-  for (let i = 0; i < 8; i++) {
-    tasks.push({
-      id: `task-${agentId}-${i}`,
-      name: taskNames[i % taskNames.length],
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      timestamp: new Date(Date.now() - Math.random() * 7 * 86400000).toISOString(),
-      duration: Math.floor(Math.random() * 120 + 5) + 's',
-    });
-  }
-  return tasks;
-}
+// ============================================
+// Utility Functions
+// ============================================
 
-function mockReviewsFor(agentId) {
-  const reviewers = ['0x4a2b...c8d1','0x9f7e...a3b2','0x1c5d...e6f4','0x8b3a...d9c7'];
-  const texts = [
-    'Reliable and fast. Consistently delivers quality results.',
-    'Good performance overall, occasional timeout on heavy loads.',
-    'Excellent accuracy. One of the best in its category.',
-    'Decent agent but could improve error handling.',
-  ];
-  return reviewers.map((r, i) => ({
-    reviewer: r,
-    score: Math.floor(Math.random() * 3 + 7),
-    text: texts[i],
-    date: new Date(Date.now() - (i + 1) * 3 * 86400000).toISOString().split('T')[0],
-  }));
-}
-
-// ---- API layer with mock fallback ----
-async function apiFetch(path) {
-  try {
-    const r = await fetch(API_BASE + path, { signal: AbortSignal.timeout(3000) });
-    if (!r.ok) throw new Error(r.status);
-    return await r.json();
-  } catch (_) {
-    return null; // fallback to mock
-  }
-}
-
-async function getAgents(query) {
-  const data = await apiFetch('/agents' + (query ? '?q=' + encodeURIComponent(query) : ''));
-  if (data && data.agents) return data.agents;
-  // mock fallback
-  let list = [...MOCK_AGENTS].sort((a, b) => b.score - a.score);
-  if (query) {
-    const q = query.toLowerCase();
-    list = list.filter(a => a.name.toLowerCase().includes(q) || a.tags.some(t => t.includes(q)));
-  }
-  return list;
-}
-
-async function getAgent(id) {
-  const data = await apiFetch('/agents/' + id);
-  if (data && data.agent) return { agent: data.agent, tasks: data.tasks, reviews: data.reviews };
-  // mock fallback
-  const agent = MOCK_AGENTS.find(a => a.id === id);
-  if (!agent) return null;
-  return { agent, tasks: mockTasksFor(id), reviews: mockReviewsFor(id) };
-}
-
-async function registerAgent(payload) {
-  try {
-    const r = await fetch(API_BASE + '/agents', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(3000),
-    });
-    if (!r.ok) throw new Error(r.status);
-    return await r.json();
-  } catch (_) {
-    // mock response
-    return { success: true, agentId: 'agent-' + Math.random().toString(36).slice(2, 10) };
-  }
-}
-
-// ---- Helpers ----
-function scoreColor(score) {
+function getScoreColor(score) {
   if (score >= 90) return 'green';
-  if (score >= 70) return 'blue';
-  if (score >= 50) return 'yellow';
+  if (score >= 70) return 'purple';
+  if (score >= 50) return 'amber';
   return 'red';
 }
 
-function formatDate(d) {
-  return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+function getScoreColorClass(score) {
+  return `score-${getScoreColor(score)}`;
 }
 
-function truncAddr(addr) {
-  if (!addr || addr.length < 12) return addr;
-  return addr;
+function getMedalClass(rank) {
+  if (rank === 1) return 'medal--gold';
+  if (rank === 2) return 'medal--silver';
+  if (rank === 3) return 'medal--bronze';
+  return '';
 }
+
+function getRankClass(rank) {
+  if (rank === 1) return 'rank--gold';
+  if (rank === 2) return 'rank--silver';
+  if (rank === 3) return 'rank--bronze';
+  return '';
+}
+
+function getInitials(name) {
+  return name.split(/[\s-]+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function formatNumber(num) {
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+  return num.toString();
+}
+
+function truncate(str, len) {
+  return str.length > len ? str.slice(0, len) + '...' : str;
+}
+
+function getCategories(agents) {
+  const cats = new Set(agents.map(a => a.category));
+  return ['all', ...Array.from(cats).sort()];
+}
+
+// ============================================
+// API Functions
+// ============================================
+
+async function fetchWithTimeout(url, options = {}, timeout = API_TIMEOUT) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(id);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+  } catch (err) {
+    clearTimeout(id);
+    throw err;
+  }
+}
+
+// Get all agents (leaderboard)
+async function getAgents() {
+  try {
+    const data = await fetchWithTimeout(`${API_BASE}/api/v1/agents`);
+    return data.agents || data;
+  } catch (err) {
+    console.warn('API unavailable, using mock data:', err.message);
+    return MOCK_AGENTS;
+  }
+}
+
+// Get single agent by ID
+async function getAgent(id) {
+  try {
+    const data = await fetchWithTimeout(`${API_BASE}/api/v1/agents/${id}`);
+    return data.agent || data;
+  } catch (err) {
+    console.warn('API unavailable, using mock data:', err.message);
+    return MOCK_AGENTS.find(a => a.id === id) || null;
+  }
+}
+
+// Get agent tasks
+async function getAgentTasks(id) {
+  try {
+    const data = await fetchWithTimeout(`${API_BASE}/api/v1/agents/${id}/tasks`);
+    return data.tasks || data;
+  } catch (err) {
+    console.warn('API unavailable, using mock data:', err.message);
+    const agent = MOCK_AGENTS.find(a => a.id === id);
+    return agent ? agent.recent_tasks : [];
+  }
+}
+
+// Get agent reviews
+async function getAgentReviews(id) {
+  try {
+    const data = await fetchWithTimeout(`${API_BASE}/api/v1/agents/${id}/reviews`);
+    return data.reviews || data;
+  } catch (err) {
+    console.warn('API unavailable, using mock data:', err.message);
+    const agent = MOCK_AGENTS.find(a => a.id === id);
+    return agent ? agent.reviews : [];
+  }
+}
+
+// Register new agent
+async function registerAgent(agentData) {
+  try {
+    const data = await fetchWithTimeout(`${API_BASE}/api/v1/agents`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(agentData),
+    }, 5000);
+    return data;
+  } catch (err) {
+    console.warn('API unavailable, simulating registration:', err.message);
+    // Simulate successful registration with mock ID
+    return {
+      success: true,
+      agent: {
+        id: `agent-${Date.now().toString(36)}`,
+        ...agentData,
+        score: 0,
+        tasks_completed: 0,
+        success_rate: 0,
+      }
+    };
+  }
+}
+
+// Get platform stats
+async function getStats() {
+  try {
+    const data = await fetchWithTimeout(`${API_BASE}/api/v1/stats`);
+    return data;
+  } catch (err) {
+    console.warn('API unavailable, computing mock stats:', err.message);
+    const totalAgents = MOCK_AGENTS.length;
+    const totalTasks = MOCK_AGENTS.reduce((sum, a) => sum + a.tasks_completed, 0);
+    const avgScore = Math.round(MOCK_AGENTS.reduce((sum, a) => sum + a.score, 0) / totalAgents);
+    return {
+      total_agents: totalAgents,
+      total_tasks: totalTasks,
+      avg_score: avgScore,
+      active_agents: Math.round(totalAgents * 0.85),
+    };
+  }
+}
+
+// Search agents
+async function searchAgents(query, category = 'all') {
+  try {
+    const params = new URLSearchParams();
+    if (query) params.set('q', query);
+    if (category && category !== 'all') params.set('category', category);
+    const data = await fetchWithTimeout(`${API_BASE}/api/v1/agents/search?${params}`);
+    return data.agents || data;
+  } catch (err) {
+    console.warn('API unavailable, searching mock data:', err.message);
+    let results = MOCK_AGENTS;
+    if (category && category !== 'all') {
+      results = results.filter(a => a.category === category);
+    }
+    if (query) {
+      const q = query.toLowerCase();
+      results = results.filter(a =>
+        a.name.toLowerCase().includes(q) ||
+        a.description.toLowerCase().includes(q) ||
+        a.capabilities.some(c => c.toLowerCase().includes(q))
+      );
+    }
+    return results;
+  }
+}
+
+// ============================================
+// DOM Helpers
+// ============================================
+
+function $(selector) {
+  return document.querySelector(selector);
+}
+
+function $$(selector) {
+  return document.querySelectorAll(selector);
+}
+
+function createElement(tag, className, innerHTML) {
+  const el = document.createElement(tag);
+  if (className) el.className = className;
+  if (innerHTML) el.innerHTML = innerHTML;
+  return el;
+}
+
+// ============================================
+// Animation Helpers
+// ============================================
+
+// CountUp animation
+function animateCountUp(element, target, duration = 2000) {
+  const start = 0;
+  const startTime = performance.now();
+
+  function update(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    const current = Math.round(start + (target - start) * eased);
+    element.textContent = formatNumber(current);
+    if (progress < 1) requestAnimationFrame(update);
+  }
+
+  requestAnimationFrame(update);
+}
+
+// Animate score bars
+function animateScoreBars() {
+  const bars = $$('.score-bar__fill');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const fill = entry.target;
+        const width = fill.dataset.width;
+        requestAnimationFrame(() => {
+          fill.style.width = width + '%';
+        });
+        observer.unobserve(fill);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  bars.forEach(bar => observer.observe(bar));
+}
+
+// Scroll animations
+function initScrollAnimations() {
+  const elements = $$('.animate-on-scroll');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  elements.forEach(el => observer.observe(el));
+}
+
+// ============================================
+// Navigation
+// ============================================
+
+function initNav() {
+  const nav = $('.nav');
+  const hamburger = $('.nav__hamburger');
+  const mobileNav = $('.nav__mobile');
+
+  // Scroll effect
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 20) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  });
+
+  // Hamburger toggle
+  if (hamburger && mobileNav) {
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileNav.classList.toggle('open');
+      document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+    });
+
+    // Close on link click
+    mobileNav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        mobileNav.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    });
+  }
+}
+
+// ============================================
+// Init shared
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+  initNav();
+  initScrollAnimations();
+});

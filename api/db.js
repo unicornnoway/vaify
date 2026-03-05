@@ -49,9 +49,18 @@ function initDb() {
       FOREIGN KEY (target_id) REFERENCES agents(id)
     );
 
+    CREATE TABLE IF NOT EXISTS api_keys (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      key TEXT NOT NULL UNIQUE,
+      name TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now')),
+      active INTEGER DEFAULT 1
+    );
+
     CREATE INDEX IF NOT EXISTS idx_tasks_executor ON tasks(executor_id);
     CREATE INDEX IF NOT EXISTS idx_tasks_requester ON tasks(requester_id);
     CREATE INDEX IF NOT EXISTS idx_reviews_target ON reviews(target_id);
+    CREATE INDEX IF NOT EXISTS idx_api_keys_key ON api_keys(key);
   `);
 
   db.close();

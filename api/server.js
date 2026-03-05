@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const crypto = require('crypto');
 const path = require('path');
 const { getDb, initDb } = require('./db');
 const { calculateScore } = require('./scoring');
@@ -13,8 +14,44 @@ app.use(express.json());
 // Serve dashboard
 app.use(express.static(path.join(__dirname, '..', 'dashboard')));
 
+// ─── API Key Auth Middleware (POST only) ───
+function requireApiKey(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'API key required' });
+  }
+  const key = authHeader.slice(7);
+  const db = getDb();
+  try {
+    const row = db.prepare('SELECT * FROM api_keys WHERE key = ?').get(key);
+    if (!row || !row.active) {
+      return res.status(403).json({ error: 'Invalid API key' });
+    }
+    req.apiKeyName = row.name;
+    next();
+  } finally {
+    db.close();
+  }
+}
+
+// ─── POST /api/v1/keys ─── Generate a new API key
+app.post('/api/v1/keys', requireApiKey, (req, res) => {
+  const { name } = req.body;
+  const newKey = crypto.randomUUID();
+  const db = getDb();
+  try {
+    const result = db.prepare(
+      'INSERT INTO api_keys (key, name) VALUES (?, ?)'
+    ).run(newKey, name || '');
+    const row = db.prepare('SELECT * FROM api_keys WHERE id = ?').get(result.lastInsertRowid);
+    res.status(201).json(row);
+  } finally {
+    db.close();
+  }
+});
+
 // ─── POST /api/v1/agents ─── Register agent
-app.post('/api/v1/agents', (req, res) => {
+app.post('/api/v1/agents', requireApiKey, (req, res) => {
   const { name, description, capabilities, creator_address } = req.body;
   if (!name) return res.status(400).json({ error: 'name is required' });
 
@@ -56,7 +93,7 @@ app.get('/api/v1/agents/:id', (req, res) => {
 });
 
 // ─── POST /api/v1/tasks ─── Report task result
-app.post('/api/v1/tasks', (req, res) => {
+app.post('/api/v1/tasks', requireApiKey, (req, res) => {
   const { requester_id, executor_id, task_type, status, duration_ms } = req.body;
   if (!requester_id || !executor_id || !task_type || !status) {
     return res.status(400).json({ error: 'requester_id, executor_id, task_type, status are required' });
@@ -79,7 +116,7 @@ app.post('/api/v1/tasks', (req, res) => {
 });
 
 // ─── POST /api/v1/reviews ─── Submit review
-app.post('/api/v1/reviews', (req, res) => {
+app.post('/api/v1/reviews', requireApiKey, (req, res) => {
   const { task_id, target_id, rating, comment } = req.body;
   if (!task_id || !target_id || !rating) {
     return res.status(400).json({ error: 'task_id, target_id, rating are required' });
