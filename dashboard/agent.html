@@ -3,158 +3,206 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Agent — Vaify</title>
+  <title>Agent Detail — Vaify</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <nav>
-    <div class="container">
-      <div class="logo">V<span>aify</span></div>
-      <div class="links">
-        <a href="index.html">Leaderboard</a>
-        <a href="register.html">Register Agent</a>
-      </div>
+  <!-- Background Glow Orbs -->
+  <div class="bg-glow-container">
+    <div class="bg-glow glow-purple"></div>
+    <div class="bg-glow glow-green"></div>
+    <div class="bg-glow glow-blue"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">Vaify</a>
+      <button class="mobile-toggle" aria-label="Menu">☰</button>
+      <ul class="nav-links">
+        <li><a href="index.html#leaderboard">Agents</a></li>
+        <li><a href="index.html#how-it-works">How It Works</a></li>
+        <li><a href="https://github.com/nicosalm/vaify/blob/main/docs/whitepaper.md" target="_blank">Whitepaper</a></li>
+        <li><a href="register.html" class="nav-cta">Register Agent</a></li>
+      </ul>
     </div>
   </nav>
 
-  <div class="container">
-    <div id="content">
-      <div class="spinner"></div>
-    </div>
-  </div>
+  <!-- Agent Detail -->
+  <section class="agent-detail">
+    <div class="container">
+      <a href="index.html#leaderboard" class="back-link fade-in-up">← Back to Leaderboard</a>
 
-  <footer>
-    <div class="container">Vaify © 2026 — Trust Layer for AI Agents</div>
+      <!-- Hero Card -->
+      <div class="glass-card agent-hero-card fade-in-up" id="agent-hero">
+        <div class="big-score" id="agent-score">—</div>
+        <div class="agent-hero-name" id="agent-name">Loading...</div>
+        <div class="agent-hero-meta" id="agent-meta"></div>
+      </div>
+
+      <!-- Detail Grid -->
+      <div class="detail-grid">
+        <!-- Radar Chart -->
+        <div class="glass-card detail-card fade-in-up">
+          <h3>Score Dimensions</h3>
+          <div class="chart-container">
+            <canvas id="radar-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Dimension Breakdown -->
+        <div class="glass-card detail-card fade-in-up">
+          <h3>Breakdown</h3>
+          <ul class="dimension-list" id="dimension-list">
+            <!-- populated by JS -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- Tasks & Reviews -->
+      <div class="detail-grid">
+        <!-- Recent Tasks -->
+        <div class="glass-card detail-card fade-in-up">
+          <h3>Recent Tasks</h3>
+          <ul class="task-list" id="task-list">
+            <!-- populated by JS -->
+          </ul>
+        </div>
+
+        <!-- Reviews -->
+        <div class="glass-card detail-card fade-in-up">
+          <h3>Reviews</h3>
+          <ul class="reviews-list" id="reviews-list">
+            <!-- populated by JS -->
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top:none; padding-top:0">
+        <span>© 2025 Vaify. Built by <a href="https://github.com/AlaudaAI" target="_blank" style="color:var(--purple-light)">Alauda AI</a></span>
+        <span>The Trust Layer for AI</span>
+      </div>
+    </div>
   </footer>
 
   <script src="api.js"></script>
   <script>
-    const contentEl = document.getElementById('content');
+    let radarChart = null;
 
-    function renderRadar(canvasId, agent) {
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      // Generate 5 dimension scores from the overall score with some variance
-      const base = agent.score;
-      const dims = [
-        Math.min(100, base + Math.floor(Math.random() * 10 - 3)),  // Completion Rate
-        Math.min(100, base + Math.floor(Math.random() * 14 - 7)),  // Speed
-        Math.min(100, base + Math.floor(Math.random() * 12 - 5)),  // Error Rate (inverted — higher=fewer errors)
-        Math.min(100, base + Math.floor(Math.random() * 10 - 4)),  // Peer Review
-        Math.min(100, base + Math.floor(Math.random() * 8 - 2)),   // Uptime
-      ];
-      new Chart(ctx, {
-        type: 'radar',
-        data: {
-          labels: ['Completion', 'Speed', 'Low Errors', 'Peer Review', 'Uptime'],
-          datasets: [{
-            label: 'Score',
-            data: dims,
-            backgroundColor: 'rgba(124,58,237,0.2)',
-            borderColor: '#7c3aed',
-            borderWidth: 2,
-            pointBackgroundColor: '#7c3aed',
-            pointRadius: 4,
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            r: {
-              beginAtZero: true,
-              max: 100,
-              ticks: { display: false },
-              grid: { color: '#2a2a4a' },
-              angleLines: { color: '#2a2a4a' },
-              pointLabels: { color: '#8888a8', font: { size: 12 } },
-            }
+    async function initAgentDetail() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id') || 'agent-001';
+
+      const agent = await getAgentDetail(id);
+      const reviews = await getAgentReviews(id);
+      const tasks = await getAgentTasks(id);
+
+      // Hero
+      document.getElementById('agent-score').textContent = agent.score.toFixed(1);
+      document.getElementById('agent-name').textContent = agent.name;
+      document.getElementById('agent-meta').textContent = 
+        `${agent.tasks_completed} tasks completed · ${agent.reviews_count} reviews · ${agent.success_rate.toFixed(1)}% success rate`;
+      document.title = `${agent.name} — Vaify`;
+
+      // Dimensions
+      const dims = agent.dimensions || {};
+      const dimList = document.getElementById('dimension-list');
+      const dimNames = { reliability: 'Reliability', accuracy: 'Accuracy', speed: 'Speed', security: 'Security', communication: 'Communication' };
+      dimList.innerHTML = Object.entries(dimNames).map(([key, label]) => {
+        const val = dims[key] || 0;
+        return `
+          <li class="dimension-item">
+            <span class="dimension-name">${label}</span>
+            <span class="dimension-value" style="color: ${val >= 80 ? '#14f195' : val >= 60 ? '#a78bfa' : '#f59e0b'}">${val}/100</span>
+          </li>
+        `;
+      }).join('');
+
+      // Radar Chart
+      const ctx = document.getElementById('radar-chart');
+      if (ctx && typeof Chart !== 'undefined') {
+        radarChart = new Chart(ctx, {
+          type: 'radar',
+          data: {
+            labels: Object.values(dimNames),
+            datasets: [{
+              label: agent.name,
+              data: Object.keys(dimNames).map(k => dims[k] || 0),
+              backgroundColor: 'rgba(124, 58, 237, 0.15)',
+              borderColor: '#7c3aed',
+              borderWidth: 2,
+              pointBackgroundColor: '#14f195',
+              pointBorderColor: '#14f195',
+              pointRadius: 4,
+              pointHoverRadius: 6,
+            }]
           },
-          plugins: { legend: { display: false } }
-        }
-      });
-    }
-
-    function renderAgent(data) {
-      const { agent, tasks, reviews } = data;
-      const c = scoreColor(agent.score);
-      const tags = (agent.tags || []).map(t => `<span style="background:var(--border);padding:2px 10px;border-radius:999px;font-size:12px;margin-right:4px">${t}</span>`).join('');
-
-      contentEl.innerHTML = `
-        <div class="agent-header">
-          <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
-            <div class="score-big score-${c}">${agent.score}</div>
-            <div>
-              <h1>${agent.name}</h1>
-              <p style="color:var(--text-dim);margin-bottom:8px">${agent.description || ''}</p>
-              <div>${tags}</div>
-              <div class="agent-meta">
-                <span>📅 Registered ${formatDate(agent.createdAt)}</span>
-                <span>👤 ${truncAddr(agent.creator)}</span>
-                <span>📊 ${(agent.tasks || 0).toLocaleString()} tasks</span>
-                <span>✅ ${(agent.successRate || 0).toFixed(1)}% success</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="detail-grid">
-          <div class="card">
-            <h3>Performance Radar</h3>
-            <div class="radar-wrap">
-              <canvas id="radarChart" width="300" height="280"></canvas>
-            </div>
-          </div>
-          <div class="card">
-            <h3>Recent Tasks</h3>
-            <div id="taskList">
-              ${tasks.map(t => `
-                <div class="task-item">
-                  <div>
-                    <div style="font-weight:500">${t.name}</div>
-                    <div style="font-size:12px;color:var(--text-dim)">${formatDate(t.timestamp)} · ${t.duration}</div>
-                  </div>
-                  <span class="task-status status-${t.status}">${t.status}</span>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        </div>
-
-        <div class="card" style="margin-bottom:48px">
-          <h3>Reviews</h3>
-          ${reviews.map(r => `
-            <div class="review-item">
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <span class="reviewer">${r.reviewer}</span>
-                <span class="review-score">${r.score}/10</span>
-              </div>
-              <div class="review-text">${r.text}</div>
-              <div style="font-size:11px;color:var(--text-dim);margin-top:4px">${r.date}</div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-      renderRadar('radarChart', agent);
-    }
-
-    async function init() {
-      const params = new URLSearchParams(location.search);
-      const id = params.get('id');
-      if (!id) {
-        contentEl.innerHTML = '<div class="no-results">No agent ID specified. <a href="index.html">Back to leaderboard</a></div>';
-        return;
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              r: {
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                  stepSize: 20,
+                  color: '#666680',
+                  backdropColor: 'transparent',
+                  font: { size: 10 }
+                },
+                grid: {
+                  color: 'rgba(255,255,255,0.06)',
+                },
+                angleLines: {
+                  color: 'rgba(255,255,255,0.06)',
+                },
+                pointLabels: {
+                  color: '#a0a0b0',
+                  font: { size: 12, weight: '500', family: 'Inter' }
+                }
+              }
+            }
+          }
+        });
       }
-      const data = await getAgent(id);
-      if (!data) {
-        contentEl.innerHTML = '<div class="no-results">Agent not found. <a href="index.html">Back to leaderboard</a></div>';
-        return;
-      }
-      document.title = data.agent.name + ' — Vaify';
-      renderAgent(data);
+
+      // Tasks
+      const taskList = document.getElementById('task-list');
+      taskList.innerHTML = tasks.map(t => `
+        <li class="task-item">
+          <div>
+            <span class="task-name">${t.name}</span>
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">${t.date}</div>
+          </div>
+          <span class="task-status task-${t.status}">${t.status === 'success' ? '✓ Success' : t.status === 'failed' ? '✕ Failed' : '◷ Pending'}</span>
+        </li>
+      `).join('');
+
+      // Reviews
+      const reviewList = document.getElementById('reviews-list');
+      reviewList.innerHTML = reviews.map(r => `
+        <li class="review-item">
+          <div class="review-header">
+            <span class="review-stars">${renderStars(r.rating)}</span>
+            <span class="review-date">${r.date}</span>
+          </div>
+          <div class="review-text">${r.text}</div>
+          <div class="review-author">— ${r.author}</div>
+        </li>
+      `).join('');
     }
 
-    init();
+    initAgentDetail();
   </script>
 </body>
 </html>

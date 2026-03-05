@@ -5,87 +5,128 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register Agent — Vaify</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
 </head>
 <body>
-  <nav>
-    <div class="container">
-      <div class="logo">V<span>aify</span></div>
-      <div class="links">
-        <a href="index.html">Leaderboard</a>
-        <a href="register.html" class="active">Register Agent</a>
-      </div>
+  <!-- Background Glow Orbs -->
+  <div class="bg-glow-container">
+    <div class="bg-glow glow-purple"></div>
+    <div class="bg-glow glow-green"></div>
+    <div class="bg-glow glow-blue"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">Vaify</a>
+      <button class="mobile-toggle" aria-label="Menu">☰</button>
+      <ul class="nav-links">
+        <li><a href="index.html#leaderboard">Agents</a></li>
+        <li><a href="index.html#how-it-works">How It Works</a></li>
+        <li><a href="https://github.com/nicosalm/vaify/blob/main/docs/whitepaper.md" target="_blank">Whitepaper</a></li>
+        <li><a href="register.html" class="nav-cta">Register Agent</a></li>
+      </ul>
     </div>
   </nav>
 
-  <div class="container">
-    <div class="form-wrap">
-      <h1>Register Agent</h1>
-      <p class="subtitle">Add your AI agent to the Vaify trust network</p>
+  <!-- Register -->
+  <section class="register-section">
+    <div class="container">
+      <div class="glass-card register-card fade-in-up">
+        <!-- Form -->
+        <form id="register-form">
+          <h2>Register Your Agent</h2>
+          <p class="subtitle">Join the trust network in under a minute</p>
 
-      <form id="registerForm">
-        <div class="field">
-          <label for="agentName">Agent Name *</label>
-          <input type="text" id="agentName" placeholder="e.g. OracleGPT" required>
-        </div>
-        <div class="field">
-          <label for="agentDesc">Description</label>
-          <textarea id="agentDesc" placeholder="What does your agent do?"></textarea>
-        </div>
-        <div class="field">
-          <label for="agentTags">Capability Tags</label>
-          <input type="text" id="agentTags" placeholder="e.g. analytics, defi, security">
-          <div class="hint">Comma-separated list of tags</div>
-        </div>
-        <div class="field">
-          <label for="creatorAddr">Creator Address *</label>
-          <input type="text" id="creatorAddr" placeholder="0x..." required>
-        </div>
-        <button type="submit" class="btn" id="submitBtn">Register Agent</button>
-      </form>
+          <div class="form-group">
+            <label for="agent-name">Agent Name</label>
+            <input type="text" id="agent-name" class="form-input" placeholder="e.g. AutoGPT Prime" required>
+          </div>
 
-      <div class="success-card" id="successCard">
-        <h2>✅ Agent Registered!</h2>
-        <p>Your agent has been added to the Vaify network.</p>
-        <div class="agent-id" id="newAgentId"></div>
-        <p style="margin-top:16px">
-          <a href="index.html" class="btn" style="text-decoration:none">View Leaderboard</a>
-        </p>
+          <div class="form-group">
+            <label for="agent-type">Agent Type</label>
+            <select id="agent-type" class="form-input form-input-select" required>
+              <option value="" disabled selected>Select type...</option>
+              <option value="autonomous">Autonomous Agent</option>
+              <option value="assistant">AI Assistant</option>
+              <option value="tool">Tool Agent</option>
+              <option value="multi">Multi-Agent System</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="agent-endpoint">API Endpoint</label>
+            <input type="url" id="agent-endpoint" class="form-input" placeholder="https://api.example.com/agent">
+          </div>
+
+          <div class="form-group">
+            <label for="agent-desc">Description</label>
+            <textarea id="agent-desc" class="form-input" placeholder="What does your agent do? What tasks can it handle?" rows="4"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="agent-capabilities">Capabilities <span style="color:var(--text-muted);font-weight:400">(comma separated)</span></label>
+            <input type="text" id="agent-capabilities" class="form-input" placeholder="code review, data analysis, smart contracts">
+          </div>
+
+          <button type="submit" class="btn btn-primary submit-btn">
+            <span class="btn-text">Register Agent →</span>
+            <span class="spinner"></span>
+          </button>
+        </form>
+
+        <!-- Success State -->
+        <div class="form-success" id="form-success">
+          <div class="check-icon">✅</div>
+          <h3>Agent Registered!</h3>
+          <p>Your agent is now part of the Vaify trust network.</p>
+          <br>
+          <a href="index.html#leaderboard" class="btn btn-secondary btn-sm">← View Leaderboard</a>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <footer>
-    <div class="container">Vaify © 2026 — Trust Layer for AI Agents</div>
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top:none; padding-top:0">
+        <span>© 2025 Vaify. Built by <a href="https://github.com/AlaudaAI" target="_blank" style="color:var(--purple-light)">Alauda AI</a></span>
+        <span>The Trust Layer for AI</span>
+      </div>
+    </div>
   </footer>
 
   <script src="api.js"></script>
   <script>
-    const form = document.getElementById('registerForm');
-    const successCard = document.getElementById('successCard');
-    const submitBtn = document.getElementById('submitBtn');
+    const form = document.getElementById('register-form');
+    const submitBtn = form.querySelector('.submit-btn');
+    const successDiv = document.getElementById('form-success');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      submitBtn.classList.add('loading');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Registering…';
 
-      const payload = {
-        name: document.getElementById('agentName').value.trim(),
-        description: document.getElementById('agentDesc').value.trim(),
-        tags: document.getElementById('agentTags').value.split(',').map(t => t.trim()).filter(Boolean),
-        creator: document.getElementById('creatorAddr').value.trim(),
+      const formData = {
+        name: document.getElementById('agent-name').value,
+        type: document.getElementById('agent-type').value,
+        endpoint: document.getElementById('agent-endpoint').value,
+        description: document.getElementById('agent-desc').value,
+        capabilities: document.getElementById('agent-capabilities').value.split(',').map(s => s.trim()).filter(Boolean),
       };
 
-      const result = await registerAgent(payload);
-
-      if (result && result.success !== false) {
+      try {
+        await registerAgent(formData);
+        // simulate slight delay for UX
+        await new Promise(r => setTimeout(r, 800));
         form.style.display = 'none';
-        document.getElementById('newAgentId').textContent = result.agentId || result.id || 'unknown';
-        successCard.style.display = 'block';
-      } else {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Register Agent';
+        successDiv.style.display = 'block';
+      } catch (err) {
         alert('Registration failed. Please try again.');
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
       }
     });
   </script>
